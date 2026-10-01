@@ -599,7 +599,8 @@ export const ShiftManager: React.FC<ShiftManagerProps> = ({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
                 <tr>
@@ -665,6 +666,63 @@ export const ShiftManager: React.FC<ShiftManagerProps> = ({
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile View: Shift History Cards */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {historicalShifts.length === 0 ? (
+              <div className="py-8 text-center text-slate-400 text-xs">
+                Belum ada riwayat shift yang ditutup.
+              </div>
+            ) : (
+              historicalShifts.map((h) => {
+                const diffVal = h.cashDifference ?? 0;
+                return (
+                  <div key={h.id} className="p-4 space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-slate-900">{h.cashierName}</div>
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          diffVal === 0
+                            ? "bg-emerald-100 text-emerald-800"
+                            : diffVal < 0
+                            ? "bg-rose-100 text-rose-800"
+                            : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        Selisih: {diffVal >= 0 ? "+" : ""}{formatRupiah(diffVal)}
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] text-slate-500 space-y-0.5">
+                      <div>Buka: {formatDate(h.openedAt)}</div>
+                      <div>Tutup: {h.closedAt ? formatDate(h.closedAt) : "Belum Ditutup"}</div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-[11px]">
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Kas Awal</span>
+                        <span className="font-semibold text-slate-700">{formatRupiah(h.openingCash)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Seharusnya</span>
+                        <span className="font-semibold text-slate-700">{formatRupiah(h.expectedCash)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px]">Fisik Laci</span>
+                        <span className="font-bold text-slate-900">{formatRupiah(h.countedCash)}</span>
+                      </div>
+                    </div>
+
+                    {h.closingNote && (
+                      <div className="text-[10px] text-slate-500 italic bg-white p-1.5 rounded border border-slate-100">
+                        Catatan: {h.closingNote}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

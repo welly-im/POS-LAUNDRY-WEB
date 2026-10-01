@@ -183,7 +183,8 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
 
       {/* Customers Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
               <tr>
@@ -284,6 +285,88 @@ export const CustomersManager: React.FC<CustomersManagerProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Customers Cards */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredCustomers.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs">
+              Tidak ditemukan data pelanggan.
+            </div>
+          ) : (
+            filteredCustomers.map((cust) => {
+              const totalSpent = cust.orders.reduce((acc, o) => acc + o.total, 0);
+
+              return (
+                <div
+                  key={cust.id}
+                  className="p-4 space-y-2 hover:bg-blue-50/30 transition-colors cursor-pointer"
+                  onClick={() => setActiveCustomer(cust)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-sm text-slate-900">{cust.name}</div>
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-emerald-600" />
+                        <span>{cust.phone}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-extrabold text-sm text-slate-900">{formatRupiah(totalSpent)}</div>
+                      <div className="text-[10px] text-slate-500 font-medium">
+                        {cust.orders.length} pesanan
+                      </div>
+                    </div>
+                  </div>
+
+                  {cust.address && (
+                    <div className="text-[11px] text-slate-600 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span className="truncate">{cust.address}</span>
+                    </div>
+                  )}
+
+                  {cust.note && (
+                    <div className="text-[10px] text-amber-700 italic bg-amber-50/60 px-2 py-0.5 rounded border border-amber-200">
+                      Catatan: {cust.note}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs" onClick={(e) => e.stopPropagation()}>
+                    <a
+                      href={generateWhatsAppUrl(
+                        cust.phone,
+                        `Halo Kak ${cust.name}, terima kasih telah mempercayakan laundry Anda di *${outletName}*! Ada yang bisa kami bantu? 😊`
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-700 font-semibold flex items-center gap-1 text-[11px] bg-emerald-50 px-2.5 py-1 rounded-lg hover:bg-emerald-100"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>Chat WA</span>
+                    </a>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(cust)}
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveCustomer(cust)}
+                        className="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold cursor-pointer"
+                      >
+                        Riwayat &rarr;
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

@@ -21,7 +21,10 @@ import {
   ChevronRight,
   ShieldAlert,
   Loader2,
-  X
+  X,
+  ArrowRight,
+  Receipt,
+  Calendar
 } from "lucide-react";
 
 interface ServiceCategory {
@@ -129,6 +132,15 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
   const [errorBanner, setErrorBanner] = useState("");
   const [completedOrder, setCompletedOrder] = useState<any | null>(null);
 
+  // Manual Estimation adjustment
+  const [customEstimatedHours, setCustomEstimatedHours] = useState<number | null>(null);
+  const [customEstimatedDateString, setCustomEstimatedDateString] = useState<string>("");
+  const [isCustomEstimate, setIsCustomEstimate] = useState<boolean>(false);
+  const [showEstimateEditor, setShowEstimateEditor] = useState<boolean>(false);
+
+  // Mobile responsive layout tab
+  const [activeMobileTab, setActiveMobileTab] = useState<"catalog" | "cart">("catalog");
+
   // Filtered services
   const filteredServices = useMemo(() => {
     return services.filter((s) => {
@@ -169,15 +181,30 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
     return cart.reduce((acc, item) => acc + Math.round(item.quantity * item.unitPrice), 0);
   }, [cart]);
 
-  // Max duration for estimated time
-  const maxDurationHours = useMemo(() => {
+  // Max duration for estimated time (default calculated from services in cart)
+  const autoDurationHours = useMemo(() => {
     if (cart.length === 0) return 24;
     return Math.max(...cart.map((i) => i.durationHours), 24);
   }, [cart]);
 
-  const estimatedDoneDate = useMemo(() => {
-    return new Date(Date.now() + maxDurationHours * 60 * 60 * 1000);
-  }, [maxDurationHours]);
+  const effectiveEstimatedDate = useMemo(() => {
+    if (isCustomEstimate && customEstimatedDateString) {
+      const d = new Date(customEstimatedDateString);
+      if (!isNaN(d.getTime())) return d;
+    }
+    const hours = customEstimatedHours !== null ? customEstimatedHours : autoDurationHours;
+    return new Date(Date.now() + hours * 60 * 60 * 1000);
+  }, [isCustomEstimate, customEstimatedDateString, customEstimatedHours, autoDurationHours]);
+
+  const formatForDateTimeInput = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
 
   // Promo discount
   const activePromo = promos.find((p) => p.id === selectedPromoId);
@@ -357,6 +384,7 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
         paymentMethod,
         cashReceived: paymentMethod === "tunai" ? cashReceived : null,
         paymentReference: paymentMethod === "qris" ? qrisRef : null,
+        customEstimatedDoneAt: isCustomEstimate ? effectiveEstimatedDate.toISOString() : null,
         note: orderNote || null,
       };
 
@@ -397,6 +425,11 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
     setDpAmountInput("");
     setCashReceivedInput("");
     setQrisRef("");
+    setIsCustomEstimate(false);
+    setCustomEstimatedHours(null);
+    setCustomEstimatedDateString("");
+    setShowEstimateEditor(false);
+    setActiveMobileTab("catalog");
   };
 
   return (
@@ -446,10 +479,43 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
         </div>
       )}
 
+      {/* Mobile Tab Switcher (Visible on mobile/tablet portrait < lg) */}
+      <div className="lg:hidden flex items-center bg-slate-200/80 p-1 rounded-2xl mb-4 text-xs font-bold">
+        <button
+          type="button"
+          onClick={() => setActiveMobileTab("catalog")}
+          className={`flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            activeMobileTab === "catalog"
+              ? "bg-white text-blue-700 shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span>Katalog Layanan</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveMobileTab("cart")}
+          className={`flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            activeMobileTab === "cart"
+              ? "bg-white text-blue-700 shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <ShoppingBag className="w-3.5 h-3.5" />
+          <span>Keranjang & Checkout</span>
+          {cart.length > 0 && (
+            <span className="bg-blue-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-extrabold">
+              {cart.length}
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Main POS Interface Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT / CENTER COLUMN: Services Catalog (7 Cols) */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className={`${activeMobileTab === "catalog" ? "block" : "hidden"} lg:block lg:col-span-7 space-y-4`}>
           {/* Search & Categories Bar */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <div className="relative">
@@ -550,7 +616,24 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
         </div>
 
         {/* RIGHT COLUMN: Order Cart & Checkout (5 Cols) */}
-        <div className="lg:col-span-5 space-y-4">
+        <div className={`${activeMobileTab === "cart" ? "block" : "hidden"} lg:block lg:col-span-5 space-y-4`}>
+          {/* Mobile Back to Catalog Button */}
+          <div className="lg:hidden flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl p-3">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMobileTab("catalog");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="text-xs font-bold text-blue-700 flex items-center gap-1.5 cursor-pointer hover:underline"
+            >
+              &larr; Tambah Layanan Lain
+            </button>
+            <span className="text-[11px] text-blue-600 font-semibold">
+              {cart.length} Item di Keranjang
+            </span>
+          </div>
+
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
             {/* 1. Customer Identification (CRM) */}
             <div>
@@ -805,16 +888,112 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
               )}
             </div>
 
-            {/* 3. Estimasi Selesai Card */}
+            {/* 3. Estimasi Selesai Card (Auto & Manual Adjustment) */}
             {cart.length > 0 && (
-              <div className="p-2.5 bg-blue-50/60 rounded-xl border border-blue-100 flex items-center justify-between text-xs">
-                <span className="text-slate-600 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-blue-600" />
-                  Estimasi Selesai ({maxDurationHours} jam):
-                </span>
-                <span className="font-bold text-blue-900">
-                  {formatDate(estimatedDoneDate)}
-                </span>
+              <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-200 text-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-700 font-semibold flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>Estimasi Selesai:</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {isCustomEstimate ? (
+                      <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-300">
+                        Manual
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        ({autoDurationHours} jam)
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!showEstimateEditor && !customEstimatedDateString) {
+                          setCustomEstimatedDateString(formatForDateTimeInput(effectiveEstimatedDate));
+                        }
+                        setShowEstimateEditor(!showEstimateEditor);
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer"
+                    >
+                      {showEstimateEditor ? "Tutup" : "Ubah Manual"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-baseline justify-between font-bold text-slate-900">
+                  <span className="text-sm font-extrabold text-blue-950">
+                    {formatDate(effectiveEstimatedDate)}
+                  </span>
+                </div>
+
+                {/* Inline Adjustment Form */}
+                {showEstimateEditor && (
+                  <div className="pt-2 border-t border-blue-200/80 space-y-2.5 animate-in fade-in duration-150">
+                    <div className="text-[11px] font-semibold text-slate-600">
+                      Pilihan Cepat Durasi:
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      {[
+                        { label: "+12 Jam (Express)", hours: 12 },
+                        { label: "+24 Jam (1 Hari)", hours: 24 },
+                        { label: "+48 Jam (2 Hari)", hours: 48 },
+                        { label: "+72 Jam (3 Hari)", hours: 72 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.hours}
+                          type="button"
+                          onClick={() => {
+                            const newDate = new Date(Date.now() + preset.hours * 3600 * 1000);
+                            setCustomEstimatedHours(preset.hours);
+                            setCustomEstimatedDateString(formatForDateTimeInput(newDate));
+                            setIsCustomEstimate(true);
+                          }}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer text-center ${
+                            isCustomEstimate && customEstimatedHours === preset.hours
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-blue-50"
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-1 pt-1">
+                      <label className="text-[11px] font-semibold text-slate-600 flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Pilih Tanggal & Jam Spesifik:</span>
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={customEstimatedDateString || formatForDateTimeInput(effectiveEstimatedDate)}
+                        onChange={(e) => {
+                          setCustomEstimatedDateString(e.target.value);
+                          setCustomEstimatedHours(null);
+                          setIsCustomEstimate(true);
+                        }}
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    {isCustomEstimate && (
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsCustomEstimate(false);
+                            setCustomEstimatedHours(null);
+                            setCustomEstimatedDateString("");
+                          }}
+                          className="text-[11px] text-rose-600 hover:text-rose-800 font-semibold cursor-pointer underline"
+                        >
+                          Reset ke Otomatis ({autoDurationHours} jam)
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -1092,6 +1271,35 @@ export const PosTerminal: React.FC<PosTerminalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile Floating Cart Summary (Visible on mobile when in Catalog tab & cart has items) */}
+      {cart.length > 0 && activeMobileTab === "catalog" && (
+        <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-slate-700/60 animate-in slide-in-from-bottom duration-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white relative shadow-sm">
+              <ShoppingBag className="w-5 h-5" />
+              <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-extrabold border-2 border-slate-900">
+                {cart.length}
+              </span>
+            </div>
+            <div>
+              <div className="text-[11px] text-slate-300 font-medium">Total Tagihan:</div>
+              <div className="text-sm font-extrabold text-white">{formatRupiah(total)}</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMobileTab("cart");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+          >
+            <span>Buka Keranjang</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* MODAL: Tambah Pelanggan Baru Inline */}
       {showAddCustomerModal && (

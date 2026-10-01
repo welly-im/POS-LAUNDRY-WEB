@@ -127,6 +127,63 @@ export const OrdersList: React.FC<OrdersListProps> = ({
 
   const [loadingAction, setLoadingAction] = useState(false);
 
+  // Manual Estimation adjustment state
+  const [editingEstimate, setEditingEstimate] = useState(false);
+  const [newEstimateInput, setNewEstimateInput] = useState("");
+  const [savingEstimate, setSavingEstimate] = useState(false);
+
+  const formatForDateTimeInput = (isoString?: string | null) => {
+    const d = isoString ? new Date(isoString) : new Date();
+    if (isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const handleSaveNewEstimate = async () => {
+    if (!selectedOrder || !newEstimateInput) return;
+    setSavingEstimate(true);
+    try {
+      const parsedDate = new Date(newEstimateInput);
+      if (isNaN(parsedDate.getTime())) {
+        showToast.error("Format tanggal dan waktu tidak valid.");
+        setSavingEstimate(false);
+        return;
+      }
+      const newIso = parsedDate.toISOString();
+      const res = await fetch("/api/orders/update-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: selectedOrder.id,
+          newEstimatedDoneAt: newIso,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showToast.error(data.error || "Gagal memperbarui estimasi selesai.");
+        setSavingEstimate(false);
+        return;
+      }
+
+      setOrders((prev) =>
+        prev.map((o) => (o.id === selectedOrder.id ? { ...o, estimatedDoneAt: newIso } : o))
+      );
+      setSelectedOrder((prev) => (prev ? { ...prev, estimatedDoneAt: newIso } : null));
+      setEditingEstimate(false);
+      showToast.success("Estimasi selesai berhasil diperbarui.");
+    } catch (err) {
+      showToast.error("Koneksi ke server gagal.");
+    } finally {
+      setSavingEstimate(false);
+    }
+  };
+
   // Filtered orders
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
@@ -469,7 +526,8 @@ export const OrdersList: React.FC<OrdersListProps> = ({
 
       {/* Orders List Table / Grid */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
               <tr>
@@ -599,6 +657,102 @@ export const OrdersList: React.FC<OrdersListProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Order Cards List */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredOrders.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs">
+              Tidak ada data pesanan yang sesuai dengan filter.
+            </div>
+          ) : (
+            filteredOrders.map((ord) => {
+              const overdue = isOrderOverdue(ord);
+              const remaining = ord.total - ord.paidAmount;
+
+              return (
+                <div
+                  key={ord.id}
+                  className="p-4 space-y-2.5 hover:bg-blue-50/30 transition-colors cursor-pointer"
+                  onClick={() => setSelectedOrder(ord)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                        <span>{ord.invoiceNo}</span>
+                        {overdue && (
+                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" title="Lewat estimasi waktu!" />
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        {formatDate(ord.createdAt)}
+                      </div>
+                    </div>
+                    <div>
+                      {getStatusBadge(ord.status)}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-semibold text-slate-800">{ord.customer.name}</div>
+                      <div className="text-[11px] text-slate-500">{ord.customer.phone}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-extrabold text-sm text-slate-900">{formatRupiah(ord.total)}</div>
+                      <div className="mt-0.5">{getPaymentBadge(ord.total, ord.paidAmount)}</div>
+                    </div>
+                  </div>
+
+                  {remaining > 0 && ord.status !== "dibatalkan" && (
+                    <div className="text-[11px] text-rose-600 font-semibold bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 flex justify-between">
+                      <span>Sisa Pembayaran:</span>
+                      <span>{formatRupiah(remaining)}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                    <div className="flex items-center gap-1 text-slate-500">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <span className={overdue ? "text-rose-600 font-bold" : "text-slate-600"}>
+                        Est: {formatDate(ord.estimatedDoneAt)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {ord.status === "selesai" && (
+                        <a
+                          href={generateWhatsAppUrl(
+                            ord.customer.phone,
+                            buildOrderReadyWhatsAppMessage({
+                              customerName: ord.customer.name,
+                              invoiceNo: ord.invoiceNo,
+                              outletName: outlet.name,
+                              total: ord.total,
+                              paidAmount: ord.paidAmount,
+                            })
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg text-xs"
+                          title="Kirim WhatsApp Siap Ambil"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrder(ord)}
+                        className="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold cursor-pointer"
+                      >
+                        Detail &rarr;
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -738,6 +892,109 @@ export const OrdersList: React.FC<OrdersListProps> = ({
                     <p className="text-[10px] text-rose-600">
                       Status DP: {selectedOrder.isRefunded ? "Dikembalikan ke pelanggan (Refund)" : "Hangus"}
                     </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Estimasi Selesai Card & Manual Adjustment */}
+              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-700 uppercase tracking-wider block text-[11px] flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-blue-600" />
+                    Estimasi Selesai Cucian
+                  </span>
+                  {selectedOrder.status !== "dibatalkan" && selectedOrder.status !== "sudah_diambil" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!editingEstimate) {
+                          setNewEstimateInput(formatForDateTimeInput(selectedOrder.estimatedDoneAt));
+                        }
+                        setEditingEstimate(!editingEstimate);
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer"
+                    >
+                      {editingEstimate ? "Batal" : "Ubah Estimasi"}
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-extrabold text-slate-900">
+                      {formatDate(selectedOrder.estimatedDoneAt)}
+                    </div>
+                    {isOrderOverdue(selectedOrder) && (
+                      <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 mt-1 inline-block">
+                        ⚠️ Pesanan Lewat Estimasi Waktu!
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {editingEstimate && (
+                  <div className="pt-2 border-t border-blue-200 space-y-2.5 animate-in fade-in duration-150">
+                    <div className="text-[11px] font-semibold text-slate-600">
+                      Pilihan Cepat Tambah Durasi (dari sekarang):
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                      {[
+                        { label: "+12 Jam", hours: 12 },
+                        { label: "+24 Jam (1 Hr)", hours: 24 },
+                        { label: "+48 Jam (2 Hr)", hours: 48 },
+                        { label: "+72 Jam (3 Hr)", hours: 72 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.hours}
+                          type="button"
+                          onClick={() => {
+                            const d = new Date(Date.now() + preset.hours * 3600 * 1000);
+                            setNewEstimateInput(formatForDateTimeInput(d.toISOString()));
+                          }}
+                          className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-white text-slate-700 border border-slate-200 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer text-center"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-600 flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Pilih Tanggal & Jam Baru:</span>
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={newEstimateInput}
+                        onChange={(e) => setNewEstimateInput(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setEditingEstimate(false)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="button"
+                        disabled={savingEstimate || !newEstimateInput}
+                        onClick={handleSaveNewEstimate}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        {savingEstimate ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            Menyimpan...
+                          </>
+                        ) : (
+                          "Simpan Perubahan"
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

@@ -242,7 +242,8 @@ export const OwnerServicesManager: React.FC<OwnerServicesManagerProps> = ({
 
       {/* Services Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
               <tr>
@@ -330,6 +331,67 @@ export const OwnerServicesManager: React.FC<OwnerServicesManagerProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Service Cards */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {filteredServices.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs">
+              Belum ada layanan di kategori ini.
+            </div>
+          ) : (
+            filteredServices.map((s) => {
+              const cat = categories.find((c) => c.id === s.categoryId);
+
+              return (
+                <div key={s.id} className="p-4 space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-sm text-slate-900">{s.name}</div>
+                      <div className="text-[11px] text-slate-500">
+                        {cat?.name || "-"} &bull; Tipe: <span className="uppercase font-semibold">{s.unitType}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleServiceActive(s)}
+                      className="cursor-pointer"
+                      title="Klik untuk ubah status"
+                    >
+                      {s.isActive ? (
+                        <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                          Aktif
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                          Nonaktif
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div>
+                      <div className="font-extrabold text-sm text-blue-600">{formatRupiah(s.price)} / {s.unitType}</div>
+                      <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3 h-3" />
+                        <span>Estimasi: {s.durationHours} Jam</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => openEditServiceModal(s)}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

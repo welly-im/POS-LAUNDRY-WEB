@@ -176,7 +176,8 @@ export const OwnerUsersManager: React.FC<OwnerUsersManagerProps> = ({
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
               <tr>
@@ -254,6 +255,70 @@ export const OwnerUsersManager: React.FC<OwnerUsersManagerProps> = ({
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: User Cards */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {usersList.map((u) => (
+            <div key={u.id} className="p-4 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                    <span>{u.fullName}</span>
+                    {u.id === currentUserId && (
+                      <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-1.5 py-0.5 rounded-md">
+                        Anda
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    @{u.username} {u.email ? `• ${u.email}` : ""}
+                  </div>
+                </div>
+
+                <span
+                  className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                    u.role === "owner"
+                      ? "bg-indigo-100 text-indigo-800"
+                      : "bg-emerald-100 text-emerald-800"
+                  }`}
+                >
+                  {u.role}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-400">Status:</span>
+                  <button
+                    type="button"
+                    disabled={u.id === currentUserId}
+                    onClick={() => handleToggleActive(u)}
+                    className="cursor-pointer disabled:opacity-50"
+                  >
+                    {u.isActive ? (
+                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        Aktif
+                      </span>
+                    ) : (
+                      <span className="bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        Nonaktif
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setResetUserId(u.id)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Key className="w-3.5 h-3.5" />
+                  Reset Sandi
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

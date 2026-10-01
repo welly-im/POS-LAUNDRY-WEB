@@ -139,7 +139,8 @@ export const OwnerPromosManager: React.FC<OwnerPromosManagerProps> = ({
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-600">
             <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
               <tr>
@@ -202,6 +203,64 @@ export const OwnerPromosManager: React.FC<OwnerPromosManagerProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View: Promo Cards */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {promos.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs">
+              Belum ada promo master yang dibuat.
+            </div>
+          ) : (
+            promos.map((p) => (
+              <div key={p.id} className="p-4 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-sm text-slate-900">{p.name}</div>
+                  <button
+                    type="button"
+                    onClick={() => togglePromoActive(p)}
+                    className="cursor-pointer"
+                  >
+                    {p.isActive ? (
+                      <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        Aktif
+                      </span>
+                    ) : (
+                      <span className="bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        Nonaktif
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <div>
+                    <span className="text-[11px] text-slate-400 block">Nilai Diskon:</span>
+                    <span className="font-extrabold text-sm text-emerald-600">
+                      {p.type === "persen" ? `${p.value}%` : formatRupiah(p.value)} ({p.type})
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[11px] text-slate-400 block">Min. Belanja:</span>
+                    <span className="font-semibold text-slate-700">
+                      {p.minSpend && p.minSpend > 0 ? formatRupiah(p.minSpend) : "Tanpa Minimum"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(p)}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit Promo</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

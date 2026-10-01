@@ -351,7 +351,8 @@ export const OwnerDashboard: React.FC<OwnerDashboardProps> = ({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50 text-[11px] font-semibold uppercase text-slate-500 border-b border-slate-100">
                 <tr>
@@ -438,6 +439,73 @@ export const OwnerDashboard: React.FC<OwnerDashboardProps> = ({
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards View for Receivables */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {receivables.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs">
+                Tidak ada piutang tertunggak! Semua pesanan aktif sudah lunas. ✨
+              </div>
+            ) : (
+              receivables.map((r) => {
+                const waMessage = buildBillingWhatsAppMessage({
+                  customerName: r.customerName,
+                  invoiceNo: r.invoiceNo,
+                  outletName,
+                  total: r.total,
+                  paidAmount: r.paidAmount,
+                  remaining: r.remaining,
+                  date: formatDateOnly(r.createdAt),
+                });
+
+                return (
+                  <div key={r.id} className="p-4 space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-slate-900">{r.invoiceNo}</div>
+                        <div className="text-[10px] text-slate-400">{formatDateOnly(r.createdAt)}</div>
+                      </div>
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          r.daysAged > 7
+                            ? "bg-rose-100 text-rose-800"
+                            : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        Umur: {r.daysAged} Hari
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-slate-800">{r.customerName}</div>
+                        <div className="text-[11px] text-slate-500">{r.customerPhone}</div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 block">Sisa Piutang:</span>
+                        <span className="font-extrabold text-sm text-rose-600">{formatRupiah(r.remaining)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                      <div className="text-[11px] text-slate-500">
+                        Total {formatRupiah(r.total)} &bull; DP {formatRupiah(r.paidAmount)}
+                      </div>
+                      <a
+                        href={generateWhatsAppUrl(r.customerPhone, waMessage)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        Tagih via WA
+                      </a>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       )}

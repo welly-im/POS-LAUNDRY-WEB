@@ -26,6 +26,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const {
       orderId,
       newStatus,
+      newEstimatedDoneAt,
       paymentKind, // 'pelunasan'
       paymentMethod, // 'tunai' | 'qris'
       paymentAmount,
@@ -34,9 +35,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       ownerOverrideReason,
     } = body;
 
-    if (!orderId || !newStatus) {
+    if (!orderId || (!newStatus && !newEstimatedDoneAt)) {
       return new Response(
-        JSON.stringify({ error: "Order ID dan Status baru wajib disertakan" }),
+        JSON.stringify({ error: "Order ID dan Status baru atau Estimasi Selesai wajib disertakan" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -139,9 +140,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
       // Update Order
       const updateData: any = {
-        status: newStatus,
         updatedAt: new Date(),
       };
+
+      if (newStatus) {
+        updateData.status = newStatus;
+      }
+
+      if (newEstimatedDoneAt) {
+        updateData.estimatedDoneAt = new Date(newEstimatedDoneAt);
+      }
 
       if (additionalPaid > 0) {
         updateData.paidAmount = order.paidAmount + additionalPaid;
@@ -157,16 +165,26 @@ export const POST: APIRoute = async ({ request, locals }) => {
         .where(eq(orders.id, order.id))
         .returning();
 
-      // Log status change
-      await tx.insert(orderStatusLogs).values({
-        orderId: order.id,
-        fromStatus: order.status,
-        toStatus: newStatus,
-        note: ownerOverrideReason
-          ? `Status diubah ke ${newStatus}. Override Owner: ${ownerOverrideReason}`
-          : `Status diubah ke ${newStatus}`,
-        changedBy: user.id,
-      });
+      // Log status change if status changed
+      if (newStatus && newStatus !== order.status) {
+        await tx.insert(orderStatusLogs).values({
+          orderId: order.id,
+          fromStatus: order.status,
+          toStatus: newStatus,
+          note: ownerOverrideReason
+            ? `Status diubah ke ${newStatus}. Override Owner: ${ownerOverrideReason}`
+            : `Status diubah ke ${newStatus}`,
+          changedBy: user.id,
+        });
+      } else if (newEstimatedDoneAt) {
+        await tx.insert(orderStatusLogs).values({
+          orderId: order.id,
+          fromStatus: order.status,
+          toStatus: order.status,
+          note: `Estimasi selesai disesuaikan menjadi ${new Date(newEstimatedDoneAt).toLocaleString("id-ID")}`,
+          changedBy: user.id,
+        });
+      }
 
       return {
         order: updatedOrder,
