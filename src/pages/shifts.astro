@@ -1,0 +1,122 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ShiftManager } from '../components/ShiftManager';
+import { db, shifts, payments, orders } from '../db';
+import { eq, and, isNull, desc, sql } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet) {
+  return Astro.redirect('/login');
+}
+
+// 1. Current active shift for user
+const activeShift = await db.query.shifts.findFirst({
+  where: and(
+    eq(shifts.cashierId, user.id),
+    isNull(shifts.closedAt)
+  ),
+  with: {
+    cashier: true,
+  },
+});
+
+let initialActiveShift = null;
+if (activeShift) {
+  // Query payments
+  const shiftPayments = await db.query.payments.findMany({
+    where: eq(payments.shiftId, activeShift.id),
+  });
+
+  let cashIn = 0;
+  let cashRefund = 0;
+  let qrisIn = 0;
+
+  for (const p of shiftPayments) {
+    if (p.method === 'tunai') {
+      if (p.kind === 'refund') cashRefund += p.amount;
+      else cashIn += p.amount;
+    } else if (p.method === 'qris') {
+      if (p.kind === 'refund') qrisIn -= p.amount;
+      else qrisIn += p.amount;
+    }
+  }
+
+  const expectedCash = activeShift.openingCash + cashIn - cashRefund;
+  const totalRealIncome = (cashIn - cashRefund) + qrisIn;
+
+  const shiftOrders = await db.query.orders.findMany({
+    where: eq(orders.shiftId, activeShift.id),
+  });
+
+  const activeOrdersWithReceivables = await db.query.orders.findMany({
+    where: and(
+      eq(orders.outletId, outlet.id),
+      sql`${orders.status} != 'dibatalkan'`,
+      sql`${orders.paidAmount} < ${orders.total}`
+    ),
+  });
+
+  let totalPiutang = 0;
+  for (const o of activeOrdersWithReceivables) {
+    totalPiutang += (o.total - o.paidAmount);
+  }
+
+  initialActiveShift = {
+    id: activeShift.id,
+    cashierId: activeShift.cashierId,
+    cashierName: activeShift.cashier.fullName,
+    openedAt: activeShift.openedAt.toISOString(),
+    openingCash: activeShift.openingCash,
+    cashIn,
+    cashRefund,
+    expectedCash,
+    qrisIn,
+    totalRealIncome,
+    orderCount: shiftOrders.length,
+    totalPiutang,
+  };
+}
+
+// 2. Historical shifts
+const pastShifts = await db.query.shifts.findMany({
+  where: eq(shifts.outletId, outlet.id),
+  orderBy: [desc(shifts.openedAt)],
+  limit: 25,
+  with: {
+    cashier: true,
+  },
+});
+
+const historicalShifts = pastShifts.map((s) => ({
+  id: s.id,
+  cashierName: s.cashier.fullName,
+  openedAt: s.openedAt.toISOString(),
+  closedAt: s.closedAt ? s.closedAt.toISOString() : null,
+  openingCash: s.openingCash,
+  countedCash: s.countedCash,
+  expectedCash: s.expectedCash,
+  cashDifference: s.cashDifference,
+  closingNote: s.closingNote,
+}));
+---
+
+<Layout title="Shift Kasir">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Shift & Rekap Kasir</h1>
+      <p class="text-sm text-slate-500">
+        Kelola kas harian, buka/tutup shift, dan pantau selisih uang fisik di laci
+      </p>
+    </div>
+
+    <ShiftManager
+      client:load
+      initialActiveShift={initialActiveShift}
+      historicalShifts={historicalShifts}
+      currentUserName={user.fullName}
+      outletName={outlet.name}
+    />
+  </div>
+</Layout>

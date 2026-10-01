@@ -1,0 +1,79 @@
+---
+import { Navbar } from '../components/Navbar';
+import { GlobalDialog } from '../components/ui/GlobalDialog';
+import '../styles/global.css';
+import { db, shifts } from '../db';
+import { eq, and, isNull } from 'drizzle-orm';
+
+interface Props {
+  title?: string;
+  showNav?: boolean;
+}
+
+const { title = "POS Laundry - Kasir & Manajemen Laundry", showNav = true } = Astro.props;
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+const currentPath = Astro.url.pathname;
+
+let activeShift = null;
+if (user && outlet) {
+  const found = await db.query.shifts.findFirst({
+    where: and(
+      eq(shifts.cashierId, user.id),
+      isNull(shifts.closedAt)
+    ),
+  });
+  if (found) {
+    activeShift = {
+      id: found.id,
+      openedAt: found.openedAt.toISOString(),
+    };
+  }
+}
+---
+
+<!doctype html>
+<html lang="id" class="h-full bg-slate-50 text-slate-900 antialiased">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} {outlet ? `| ${outlet.name}` : ""}</title>
+  </head>
+  <body class="min-h-full flex flex-col font-sans text-slate-800">
+    {showNav && user && outlet && (
+      <Navbar
+        client:load
+        currentPath={currentPath}
+        user={{
+          fullName: user.fullName,
+          username: user.username,
+          role: user.role,
+        }}
+        outlet={{
+          name: outlet.name,
+        }}
+        activeShift={activeShift}
+      />
+    )}
+
+    <GlobalDialog client:load />
+
+    <main class="flex-1 w-full">
+      <slot />
+    </main>
+
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.log('SW registration skipped or failed:', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

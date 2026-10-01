@@ -1,0 +1,40 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { OwnerSettingsManager } from '../../components/OwnerSettingsManager';
+import { db, outlets, users } from '../../db';
+import { eq } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet || user.role !== 'owner') {
+  return Astro.redirect('/pos?error=unauthorized_role');
+}
+
+const dbUser = await db.query.users.findFirst({
+  where: eq(users.id, user.id),
+});
+---
+
+<Layout title="Pengaturan Usaha & Template Struk">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pengaturan Usaha & Template Struk</h1>
+      <p class="text-sm text-slate-500">
+        Ubah profil usaha, kontak WhatsApp, catatan kaki struk thermal, dan PIN otorisasi
+      </p>
+    </div>
+
+    <OwnerSettingsManager
+      client:load
+      outlet={{
+        id: outlet.id,
+        name: outlet.name,
+        address: outlet.address,
+        phone: outlet.phone,
+        receiptFooter: outlet.receiptFooter,
+      }}
+      ownerPin={dbUser?.pin || '1234'}
+    />
+  </div>
+</Layout>

@@ -1,0 +1,204 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { OwnerDashboard } from '../../components/OwnerDashboard';
+import { db, orders, payments, orderItems, users } from '../../db';
+import { eq, and, sql, gte, lte, desc } from 'drizzle-orm';
+import { formatDateOnly } from '../../lib/format';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet || user.role !== 'owner') {
+  return Astro.redirect('/pos?error=unauthorized_role');
+}
+
+// 1. Time boundaries (Asia/Jakarta)
+const now = new Date();
+const startOfToday = new Date(now);
+startOfToday.setHours(0, 0, 0, 0);
+
+const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+// 2. Today Orders
+const todayOrders = await db.query.orders.findMany({
+  where: and(
+    eq(orders.outletId, outlet.id),
+    gte(orders.createdAt, startOfToday)
+  ),
+  with: {
+    customer: true,
+  },
+});
+
+let todayOmzet = 0;
+let todayNewReceivables = 0;
+for (const o of todayOrders) {
+  if (o.status !== 'dibatalkan') {
+    todayOmzet += o.total;
+    if (o.paidAmount < o.total) {
+      todayNewReceivables += (o.total - o.paidAmount);
+    }
+  }
+}
+
+// 3. Today Payments
+const todayPayments = await db.query.payments.findMany({
+  where: gte(payments.createdAt, startOfToday),
+  with: {
+    order: true,
+  },
+});
+
+let todayCash = 0;
+let todayQris = 0;
+for (const p of todayPayments) {
+  if (p.order.outletId === outlet.id) {
+    if (p.method === 'tunai') {
+      if (p.kind === 'refund') todayCash -= p.amount;
+      else todayCash += p.amount;
+    } else if (p.method === 'qris') {
+      if (p.kind === 'refund') todayQris -= p.amount;
+      else todayQris += p.amount;
+    }
+  }
+}
+const todayRealIncome = todayCash + todayQris;
+
+// 4. Receivables (Daftar Piutang)
+const activeUnpaidOrders = await db.query.orders.findMany({
+  where: and(
+    eq(orders.outletId, outlet.id),
+    sql`${orders.status} != 'dibatalkan'`,
+    sql`${orders.paidAmount} < ${orders.total}`
+  ),
+  with: {
+    customer: true,
+  },
+  orderBy: [desc(orders.createdAt)],
+});
+
+let totalActivePiutang = 0;
+const receivablesList = activeUnpaidOrders.map((o) => {
+  const rem = o.total - o.paidAmount;
+  totalActivePiutang += rem;
+  const daysAged = Math.floor((now.getTime() - o.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+  return {
+    id: o.id,
+    invoiceNo: o.invoiceNo,
+    createdAt: o.createdAt.toISOString(),
+    customerName: o.customer.name,
+    customerPhone: o.customer.phone,
+    total: o.total,
+    paidAmount: o.paidAmount,
+    remaining: rem,
+    daysAged,
+    status: o.status,
+  };
+});
+
+// 5. Active orders count
+const activeOrders = await db.query.orders.findMany({
+  where: and(
+    eq(orders.outletId, outlet.id),
+    sql`${orders.status} IN ('diterima', 'diproses', 'selesai')`
+  ),
+});
+
+// 6. Month Summary
+const monthOrders = await db.query.orders.findMany({
+  where: and(
+    eq(orders.outletId, outlet.id),
+    gte(orders.createdAt, startOfMonth)
+  ),
+  with: {
+    items: true,
+    creator: true,
+  },
+});
+
+let monthOmzet = 0;
+let monthCancelledCount = 0;
+const serviceMap = new Map<string, { serviceName: string; unitType: string; totalQty: number; totalAmount: number }>();
+const cashierMap = new Map<string, { cashierName: string; orderCount: number; totalOmzet: number }>();
+
+for (const o of monthOrders) {
+  if (o.status === 'dibatalkan') {
+    monthCancelledCount++;
+  } else {
+    monthOmzet += o.total;
+
+    // Cashier performance
+    const cName = o.creator?.fullName || 'Kasir';
+    const cData = cashierMap.get(cName) || { cashierName: cName, orderCount: 0, totalOmzet: 0 };
+    cData.orderCount++;
+    cData.totalOmzet += o.total;
+    cashierMap.set(cName, cData);
+
+    // Items performance
+    for (const it of o.items) {
+      const sData = serviceMap.get(it.serviceName) || {
+        serviceName: it.serviceName,
+        unitType: it.unitType,
+        totalQty: 0,
+        totalAmount: 0,
+      };
+      sData.totalQty += Number(it.quantity);
+      sData.totalAmount += it.subtotal;
+      serviceMap.set(it.serviceName, sData);
+    }
+  }
+}
+
+const activeMonthOrderCount = monthOrders.filter((o) => o.status !== 'dibatalkan').length;
+const avgOrderValue = activeMonthOrderCount > 0 ? Math.round(monthOmzet / activeMonthOrderCount) : 0;
+
+const monthFormatter = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' });
+---
+
+<Layout title="Dashboard & Laporan Pemilik">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Dashboard & Laporan Usaha</h1>
+        <p class="text-sm text-slate-500">
+          Ringkasan omzet, uang riil laci & bank, dan rekap piutang {outlet.name}
+        </p>
+      </div>
+    </div>
+
+    <OwnerDashboard
+      client:load
+      metrics={{
+        todayOmzet,
+        todayRealIncome,
+        todayCash,
+        todayQris,
+        totalActivePiutang,
+        activeOrdersCount: activeOrders.length,
+      }}
+      dailySummary={{
+        date: formatDateOnly(now),
+        totalOmzet: todayOmzet,
+        cashIncome: todayCash,
+        qrisIncome: todayQris,
+        totalRealIncome: todayRealIncome,
+        orderCount: todayOrders.filter((o) => o.status !== 'dibatalkan').length,
+        newReceivables: todayNewReceivables,
+      }}
+      monthlySummary={{
+        monthName: monthFormatter.format(now),
+        totalOmzet: monthOmzet,
+        cashIncome: todayCash, // current month cash
+        qrisIncome: todayQris,
+        totalRealIncome: monthOmzet, // Real revenue tracked
+        orderCount: activeMonthOrderCount,
+        avgOrderValue,
+        cancelledCount: monthCancelledCount,
+        serviceBreakdown: Array.from(serviceMap.values()),
+        cashierBreakdown: Array.from(cashierMap.values()),
+      }}
+      receivables={receivablesList}
+      outletName={outlet.name}
+    />
+  </div>
+</Layout>

@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { OwnerServicesManager } from '../../components/OwnerServicesManager';
+import { db, serviceCategories, services } from '../../db';
+import { eq, desc } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet || user.role !== 'owner') {
+  return Astro.redirect('/pos?error=unauthorized_role');
+}
+
+const categories = await db.query.serviceCategories.findMany({
+  where: eq(serviceCategories.outletId, outlet.id),
+  orderBy: [desc(serviceCategories.createdAt)],
+});
+
+const servicesList = await db.query.services.findMany({
+  where: eq(services.outletId, outlet.id),
+  orderBy: [desc(services.createdAt)],
+});
+---
+
+<Layout title="Master Layanan & Harga">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Master Layanan & Harga</h1>
+      <p class="text-sm text-slate-500">
+        Kelola kategori layanan cucian, tarif kiloan & satuan, dan durasi estimasi pengerjaan
+      </p>
+    </div>
+
+    <OwnerServicesManager
+      client:load
+      initialCategories={categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        isActive: c.isActive,
+      }))}
+      initialServices={servicesList.map((s) => ({
+        id: s.id,
+        categoryId: s.categoryId,
+        name: s.name,
+        unitType: s.unitType as any,
+        price: s.price,
+        durationHours: s.durationHours,
+        isActive: s.isActive,
+      }))}
+    />
+  </div>
+</Layout>

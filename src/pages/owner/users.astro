@@ -1,0 +1,44 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { OwnerUsersManager } from '../../components/OwnerUsersManager';
+import { db, users } from '../../db';
+import { eq, desc } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet || user.role !== 'owner') {
+  return Astro.redirect('/pos?error=unauthorized_role');
+}
+
+const usersList = await db.query.users.findMany({
+  where: eq(users.outletId, outlet.id),
+  orderBy: [desc(users.createdAt)],
+});
+---
+
+<Layout title="Kelola Karyawan & Akun Kasir">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Karyawan & Akun Kasir</h1>
+      <p class="text-sm text-slate-500">
+        Kelola akun operator kasir, peran staf, dan reset password login
+      </p>
+    </div>
+
+    <OwnerUsersManager
+      client:load
+      initialUsers={usersList.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        fullName: u.fullName,
+        role: u.role,
+        pin: u.pin,
+        isActive: u.isActive,
+        createdAt: u.createdAt.toISOString(),
+      }))}
+      currentUserId={user.id}
+    />
+  </div>
+</Layout>

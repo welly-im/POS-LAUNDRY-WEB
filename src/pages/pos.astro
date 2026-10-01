@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { PosTerminal } from '../components/PosTerminal';
+import { db, serviceCategories, services, promos, shifts } from '../db';
+import { eq, and, isNull } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet) {
+  return Astro.redirect('/login');
+}
+
+// 1. Categories
+const categories = await db.query.serviceCategories.findMany({
+  where: and(eq(serviceCategories.outletId, outlet.id), eq(serviceCategories.isActive, true)),
+});
+
+// 2. Services
+const activeServices = await db.query.services.findMany({
+  where: and(eq(services.outletId, outlet.id), eq(services.isActive, true)),
+});
+
+// 3. Promos
+const activePromos = await db.query.promos.findMany({
+  where: and(eq(promos.outletId, outlet.id), eq(promos.isActive, true)),
+});
+
+// 4. Active Shift for this cashier
+const activeShift = await db.query.shifts.findFirst({
+  where: and(
+    eq(shifts.cashierId, user.id),
+    isNull(shifts.closedAt)
+  ),
+});
+---
+
+<Layout title="Kasir & Order Baru">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <PosTerminal
+      client:load
+      categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+      services={activeServices.map((s) => ({
+        id: s.id,
+        categoryId: s.categoryId,
+        name: s.name,
+        unitType: s.unitType,
+        price: s.price,
+        durationHours: s.durationHours,
+      }))}
+      promos={activePromos.map((p) => ({
+        id: p.id,
+        name: p.name,
+        type: p.type,
+        value: p.value,
+        minSpend: p.minSpend,
+      }))}
+      activeShift={
+        activeShift
+          ? {
+              id: activeShift.id,
+              openedAt: activeShift.openedAt.toISOString(),
+            }
+          : null
+      }
+      userRole={user.role}
+      outlet={{
+        name: outlet.name,
+        address: outlet.address,
+        phone: outlet.phone,
+        receiptFooter: outlet.receiptFooter,
+      }}
+    />
+  </div>
+</Layout>

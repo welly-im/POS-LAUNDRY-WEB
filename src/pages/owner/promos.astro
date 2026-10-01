@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { OwnerPromosManager } from '../../components/OwnerPromosManager';
+import { db, promos } from '../../db';
+import { eq, desc } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet || user.role !== 'owner') {
+  return Astro.redirect('/pos?error=unauthorized_role');
+}
+
+const promosList = await db.query.promos.findMany({
+  where: eq(promos.outletId, outlet.id),
+  orderBy: [desc(promos.createdAt)],
+});
+---
+
+<Layout title="Master Promo Diskon">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Master Promo Diskon</h1>
+      <p class="text-sm text-slate-500">
+        Kelola promo persentase atau potongan harga nominal untuk pelanggan
+      </p>
+    </div>
+
+    <OwnerPromosManager
+      client:load
+      initialPromos={promosList.map((p) => ({
+        id: p.id,
+        name: p.name,
+        type: p.type as any,
+        value: p.value,
+        minSpend: p.minSpend,
+        isActive: p.isActive,
+      }))}
+    />
+  </div>
+</Layout>

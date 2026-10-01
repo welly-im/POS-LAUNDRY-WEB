@@ -1,0 +1,105 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { OrdersList } from '../components/OrdersList';
+import { db, orders, shifts } from '../db';
+import { eq, desc, and, isNull } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet) {
+  return Astro.redirect('/login');
+}
+
+// 1. Fetch orders for this outlet
+const ordersData = await db.query.orders.findMany({
+  where: eq(orders.outletId, outlet.id),
+  orderBy: [desc(orders.createdAt)],
+  limit: 50,
+  with: {
+    customer: true,
+    items: true,
+    payments: true,
+    creator: true,
+  },
+});
+
+// 2. Active shift of cashier
+const activeShift = await db.query.shifts.findFirst({
+  where: and(
+    eq(shifts.cashierId, user.id),
+    isNull(shifts.closedAt)
+  ),
+});
+
+const formattedOrders = ordersData.map((o) => ({
+  id: o.id,
+  invoiceNo: o.invoiceNo,
+  createdAt: o.createdAt.toISOString(),
+  status: o.status as any,
+  subtotal: o.subtotal,
+  promoDiscount: o.promoDiscount,
+  manualDiscount: o.manualDiscount,
+  manualDiscountReason: o.manualDiscountReason,
+  total: o.total,
+  paidAmount: o.paidAmount,
+  estimatedDoneAt: o.estimatedDoneAt ? o.estimatedDoneAt.toISOString() : null,
+  note: o.note,
+  cancelReason: o.cancelReason,
+  isRefunded: o.isRefunded,
+  shiftId: o.shiftId,
+  customer: {
+    id: o.customer.id,
+    name: o.customer.name,
+    phone: o.customer.phone,
+    address: o.customer.address,
+  },
+  items: o.items.map((it) => ({
+    id: it.id,
+    serviceName: it.serviceName,
+    unitType: it.unitType as any,
+    unitPrice: it.unitPrice,
+    quantity: it.quantity,
+    subtotal: it.subtotal,
+    note: it.note,
+  })),
+  payments: o.payments.map((p) => ({
+    id: p.id,
+    kind: p.kind,
+    method: p.method,
+    amount: p.amount,
+    cashReceived: p.cashReceived,
+    changeGiven: p.changeGiven,
+    reference: p.reference,
+    createdAt: p.createdAt.toISOString(),
+  })),
+  creator: o.creator ? { fullName: o.creator.fullName } : undefined,
+}));
+---
+
+<Layout title="Daftar Pesanan & Status Cucian">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Daftar Pesanan Laundry</h1>
+        <p className="text-sm text-slate-500">
+          Lacak progres cucian (Diterima &rarr; Diproses &rarr; Selesai &rarr; Diambil) dan kelola pembayaran
+        </p>
+      </div>
+    </div>
+
+    <OrdersList
+      client:load
+      initialOrders={formattedOrders}
+      userRole={user.role}
+      currentUserId={user.id}
+      activeShiftId={activeShift?.id || null}
+      outlet={{
+        name: outlet.name,
+        address: outlet.address,
+        phone: outlet.phone,
+        receiptFooter: outlet.receiptFooter,
+      }}
+    />
+  </div>
+</Layout>

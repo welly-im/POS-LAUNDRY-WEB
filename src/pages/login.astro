@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { LoginForm } from '../components/LoginForm';
+
+// If already logged in, redirect handled in middleware
+---
+
+<Layout title="Masuk - POS Laundry Pintar" showNav={false}>
+  <div class="min-h-screen bg-linear-to-br from-slate-100 via-blue-50/40 to-slate-200 flex flex-col justify-center items-center p-4">
+    <LoginForm client:load />
+    
+    <div class="mt-6 text-center text-xs text-slate-500">
+      &copy; {new Date().getFullYear()} POS Laundry System &bull; Versi 1.0 (MVP)
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,57 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { CustomersManager } from '../components/CustomersManager';
+import { db, customers } from '../db';
+import { eq, desc } from 'drizzle-orm';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+
+if (!user || !outlet) {
+  return Astro.redirect('/login');
+}
+
+const customersData = await db.query.customers.findMany({
+  where: eq(customers.outletId, outlet.id),
+  orderBy: [desc(customers.createdAt)],
+  with: {
+    orders: {
+      orderBy: (o, { desc }) => [desc(o.createdAt)],
+    },
+  },
+});
+
+const formattedCustomers = customersData.map((c) => ({
+  id: c.id,
+  name: c.name,
+  phone: c.phone,
+  address: c.address,
+  note: c.note,
+  createdAt: c.createdAt.toISOString(),
+  orders: c.orders.map((o) => ({
+    id: o.id,
+    invoiceNo: o.invoiceNo,
+    createdAt: o.createdAt.toISOString(),
+    status: o.status,
+    total: o.total,
+    paidAmount: o.paidAmount,
+  })),
+}));
+---
+
+<Layout title="Database Pelanggan Laundry">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Database Pelanggan (CRM)</h1>
+      <p class="text-sm text-slate-500">
+        Kelola profil pelanggan, kontak WhatsApp, dan riwayat pesanan cucian
+      </p>
+    </div>
+
+    <CustomersManager
+      client:load
+      initialCustomers={formattedCustomers}
+      outletName={outlet.name}
+    />
+  </div>
+</Layout>

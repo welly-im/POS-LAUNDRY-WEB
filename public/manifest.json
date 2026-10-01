@@ -1,0 +1,17 @@
+{
+  "name": "POS Laundry - Kasir Laundry Pintar",
+  "short_name": "POS Laundry",
+  "description": "Sistem Kasir & Manajemen Laundry Cepat, Akurat, dan Modern",
+  "start_url": "/pos",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
