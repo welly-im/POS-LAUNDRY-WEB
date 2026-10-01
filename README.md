@@ -103,16 +103,3 @@ node ./dist/server/entry.mjs
   ```
 
 ---
-
-## 📋 Konfigurasi Environment (`.env`)
-
-```ini
-DATABASE_URL="postgres://avnadmin:<PASSWORD>@<HOST>:<PORT>/defaultdb?sslmode=require"
-SESSION_SECRET="e9b2512f451f28b4957e8498f73a3885d562dc629851dbef77ce68233a1811db"
-DEFAULT_OUTLET_NAME="POS LAUNDRY"
-DEFAULT_ADMIN_USER="admin"
-DEFAULT_ADMIN_PASS="123456"
-PORT=4321
-HOST=0.0.0.0
-NODE_ENV=production
-```
