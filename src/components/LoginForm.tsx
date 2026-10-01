@@ -148,7 +148,7 @@ export const LoginForm: React.FC = () => {
       </form>
 
       {/* Quick fill for convenient initial testing */}
-      <div className="mt-8 pt-6 border-t border-slate-100">
+      {/* <div className="mt-8 pt-6 border-t border-slate-100">
         <p className="text-xs text-center font-medium text-slate-500 mb-3">
           Akun Awal Bawaan (Bisa diubah di Pengaturan):
         </p>
@@ -168,7 +168,7 @@ export const LoginForm: React.FC = () => {
             Masuk sbg <strong>Kasir</strong>
           </button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
