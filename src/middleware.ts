@@ -24,6 +24,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const { pathname } = context.url;
+
+  // 1. Google Site Verification files (e.g. /google123456789.html, /googlea81ff21785a16685.html)
+  if (/^\/google[a-zA-Z0-9_-]+\.html$/i.test(pathname)) {
+    const filename = pathname.replace(/^\//, "");
+    return new Response(`google-site-verification: ${filename}`, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  }
+
   const isPublic =
     pathname === "/" ||
     pathname === "/login" ||
@@ -35,7 +48,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname.startsWith("/api/auth/logout") ||
     pathname.startsWith("/_astro") ||
     pathname.startsWith("/favicon") ||
-    pathname.startsWith("/manifest.json");
+    pathname.startsWith("/manifest.json") ||
+    pathname.startsWith("/sw.js") ||
+    pathname.startsWith("/robots.txt") ||
+    pathname.startsWith("/sitemap") ||
+    /^\/google[a-zA-Z0-9_-]+\.html$/i.test(pathname) ||
+    pathname.endsWith(".html") ||
+    pathname.endsWith(".ico") ||
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".png") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".jpeg") ||
+    pathname.endsWith(".webp") ||
+    pathname.endsWith(".txt") ||
+    pathname.endsWith(".xml") ||
+    pathname.endsWith(".json");
 
   // If user is accessing /login while already logged in
   if (pathname === "/login" && context.locals.user) {

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Allow: /google*.html
+Disallow: /api/
+Disallow: /owner/
+Disallow: /pos
+Disallow: /shifts
+Disallow: /orders
+Disallow: /customers
