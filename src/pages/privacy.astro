@@ -1,0 +1,349 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {
+  ShieldCheck,
+  Lock,
+  UserCheck,
+  Database,
+  FileText,
+  Mail,
+  ArrowLeft,
+  Calendar,
+  Share2,
+  ExternalLink,
+  ChevronRight,
+  Eye,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+const lastUpdated = "9 Oktober 2026";
+---
+
+<Layout title="Kebijakan Privasi - POS Laundry" showNav={false}>
+  <div class="min-h-screen bg-slate-50 text-slate-800">
+    {/* Top Header Navigation */}
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href={user ? (user.role === 'owner' ? '/owner' : '/pos') : '/login'} class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs shadow-blue-500/20">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <span class="font-bold text-base text-slate-900 tracking-tight block leading-tight">
+              POS Laundry
+            </span>
+            <span class="text-[10px] font-medium text-slate-500 block uppercase tracking-wider">
+              Pusat Legalitas & Keamanan
+            </span>
+          </div>
+        </a>
+
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-1 text-xs">
+            <span class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200">
+              Kebijakan Privasi
+            </span>
+            <a href="/terms" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition-colors">
+              Syarat & Ketentuan
+            </a>
+          </div>
+
+          <a
+            href={user ? (user.role === 'owner' ? '/owner' : '/pos') : '/login'}
+            class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>{user ? 'Kembali ke Aplikasi' : 'Masuk ke Kasir'}</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    {/* Hero Header */}
+    <section class="bg-linear-to-b from-blue-50/70 via-slate-50 to-slate-50 border-b border-slate-200/70 py-10 sm:py-14">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold border border-blue-200">
+          <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+          <span>Keamanan Data & Privasi Terjamin</span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Kebijakan Privasi (Privacy Policy)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          Komitmen resmi platform <strong>POS Laundry</strong> dalam melindungi privasi, data usaha, data kasir, dan kerahasiaan data pelanggan cucian Anda.
+        </p>
+        <div class="flex items-center justify-center gap-2 text-[11px] text-slate-500 pt-2">
+          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+          <span>Terakhir diperbarui: <strong>{lastUpdated}</strong></span>
+          <span>&bull;</span>
+          <span>Berlaku untuk domain: <code class="bg-slate-200/60 px-1.5 py-0.5 rounded text-slate-700">pos-laundry.vercel.app</code></span>
+        </div>
+      </div>
+    </section>
+
+    {/* Main Content Area */}
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      {/* Mobile Tab Switcher */}
+      <div class="sm:hidden flex items-center bg-slate-200/80 p-1 rounded-xl mb-6 text-xs font-bold">
+        <span class="flex-1 py-2 text-center rounded-lg bg-white text-blue-700 shadow-xs">
+          Kebijakan Privasi
+        </span>
+        <a href="/terms" class="flex-1 py-2 text-center rounded-lg text-slate-600 hover:text-slate-900">
+          Syarat & Ketentuan
+        </a>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-10 space-y-10 text-xs sm:text-sm leading-relaxed text-slate-700">
+
+        {/* 1. Pendahuluan */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">1</span>
+            <h2>Pendahuluan</h2>
+          </div>
+          <p>
+            Selamat datang di <strong>POS Laundry</strong> (layanan kasir dan manajemen operasional laundry berbasis web yang dapat diakses di <a href="https://pos-laundry.vercel.app" class="text-blue-600 font-medium underline">https://pos-laundry.vercel.app</a>). Kami sangat menghargai privasi dan kepercayaan Anda sebagai pengusaha laundry, kasir, serta pelanggan layanan laundry Anda.
+          </p>
+          <p>
+            Kebijakan Privasi ini menerangkan bagaimana kami mengumpulkan, menggunakan, menyimpan, memproses, serta melindungi informasi pribadi yang Anda berikan ketika menggunakan platform kami. Dengan mengakses atau menggunakan POS Laundry, Anda menyatakan telah membaca, memahami, dan menyetujui ketentuan pemrosesan data yang tercantum dalam dokumen ini.
+          </p>
+        </section>
+
+        {/* 2. Informasi yang Kami Kumpulkan */}
+        <section class="space-y-4">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">2</span>
+            <h2>Informasi yang Kami Kumpulkan</h2>
+          </div>
+          <p>
+            Untuk memberikan layanan operasional kasir laundry yang cepat dan akurat, kami mengumpulkan data dalam beberapa kategori berikut:
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
+                <UserCheck className="w-4 h-4 text-blue-600" />
+                <span>A. Informasi Akun & Outlet</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-slate-600 text-xs">
+                <li>Nama lengkap dan username pengguna (Owner / Kasir).</li>
+                <li>Alamat email untuk pemulihan akun atau verifikasi.</li>
+                <li>Kata sandi (disimpan dalam bentuk hash kriptografi satu arah).</li>
+                <li>PIN otorisasi Owner untuk persetujuan diskon & pembatalan.</li>
+                <li>Nama outlet usaha laundry, alamat fisik, dan nomor kontak outlet.</li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
+                <FileText className="w-4 h-4 text-emerald-600" />
+                <span>B. Data Pelanggan Laundry</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-slate-600 text-xs">
+                <li>Nama pelanggan cucian.</li>
+                <li>Nomor telepon / WhatsApp pelanggan untuk pengiriman notifikasi nota & status cucian.</li>
+                <li>Alamat pelanggan (jika menggunakan layanan antar-jemput).</li>
+                <li>Catatan instruksi khusus pencucian (misal: "jangan disikat", "lipat rapi").</li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
+                <Database className="w-4 h-4 text-amber-600" />
+                <span>C. Data Transaksi & Operasional</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-slate-600 text-xs">
+                <li>Nomor invoice urut (contoh: <code>LDR-261009-0001</code>).</li>
+                <li>Layanan yang dipilih (kiloan/satuan), kuantitas (kg/pcs), dan harga.</li>
+                <li>Estimasi tanggal & jam selesai cucian (otomatis maupun manual).</li>
+                <li>Metode pembayaran (Tunai, QRIS/Transfer) dan riwayat DP/Pelunasan.</li>
+                <li>Riwayat pembukaan dan penutupan shift kasir (laci kas fisik).</li>
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5 text-xs sm:text-sm">
+                <Lock className="w-4 h-4 text-purple-600" />
+                <span>D. Data Teknis & Sesi</span>
+              </div>
+              <ul class="list-disc list-inside space-y-1 text-slate-600 text-xs">
+                <li>Informasi peramban web (*browser*), jenis perangkat, dan sistem operasi.</li>
+                <li>Cookie sesi otentikasi aman (<code>pos_laundry_session</code>).</li>
+                <li>Log aktivitas audit (*audit logs*) untuk integritas data finansial.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. Penggunaan Informasi */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">3</span>
+            <h2>Tujuan & Penggunaan Informasi</h2>
+          </div>
+          <p>
+            Informasi yang dikumpulkan digunakan semata-mata untuk mendukung kelancaran kegiatan operasional bisnis laundry Anda, antara lain:
+          </p>
+          <ul class="space-y-2 text-slate-600 list-disc list-inside">
+            <li><strong>Penerbitan Nota & Struk:</strong> Mencetak struk fisik kasir (printer termal 58mm/80mm) dan menghasilkan tautan nota digital untuk pelanggan.</li>
+            <li><strong>Notifikasi WhatsApp:</strong> Memfasilitasi pengiriman pesan otomatis melalui integrasi WhatsApp (wa.me) saat cucian telah <em>Selesai & Siap Diambil</em> atau pengingat tagihan piutang.</li>
+            <li><strong>Pelacakan Status Cucian:</strong> Memonitor alur kerja pencucian dari status <em>Diterima &rarr; Diproses &rarr; Selesai &rarr; Sudah Diambil</em> secara real-time.</li>
+            <li><strong>Keamanan Finansial & Shift Kasir:</strong> Merekonsiliasi uang fisik di laci kasir saat pergantian shift kasir demi mencegah kebocoran kas.</li>
+            <li><strong>Laporan Keuangan Owner:</strong> Menghasilkan grafik omzet harian, laporan bulanan, dan ekspor data CSV untuk pembukuan pemilik usaha.</li>
+          </ul>
+        </section>
+
+        {/* 4. Penyimpanan dan Keamanan Data */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">4</span>
+            <h2>Penyimpanan & Keamanan Data</h2>
+          </div>
+          <p>
+            Kami menerapkan langkah-langkah perlindungan teknis dan organisasi berlapis untuk menjaga keamanan data:
+          </p>
+          <div class="space-y-2.5">
+            <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <strong class="text-slate-900 block">Enkripsi Jaringan (SSL/TLS)</strong>
+                <span class="text-xs text-slate-600">Seluruh lalu lintas komunikasi data antara peramban pengguna dan server dienkripsi menggunakan protokol HTTPS dengan sertifikat SSL standar industri.</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <strong class="text-slate-900 block">Hash Sandi Kriptografis</strong>
+                <span class="text-xs text-slate-600">Kata sandi tidak pernah disimpan dalam format teks biasa (plain text), melainkan di-hash secara aman menggunakan salt dan algoritma hashing modern.</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <strong class="text-slate-900 block">Penyimpanan Cloud Terproteksi</strong>
+                <span class="text-xs text-slate-600">Basis data disimpan pada cluster PostgreSQL cloud bersertifikasi keamanan dengan firewall ketat dan pencadangan berkala.</span>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <strong class="text-slate-900 block">Isolasi Multi-Outlet</strong>
+                <span class="text-xs text-slate-600">Setiap data transaksi dan pelanggan diisolasi berdasarkan ID Outlet masing-masing sehingga tidak dapat diakses oleh outlet usaha lain.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Pembagian Data kepada Pihak Ketiga */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">5</span>
+            <h2>Pembagian Data Pihak Ketiga</h2>
+          </div>
+          <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
+            <strong>Komitmen Anti-Spam & Tanpa Penjualan Data:</strong>
+            <p>
+              Kami <strong>TIDAK PERNAH MENJUAL, MENYEWAKAN, ATAU MEMPERDAGANGKAN</strong> data pribadi pelanggan Anda, nomor WhatsApp, maupun laporan keuangan usaha laundry Anda kepada pihak pengiklan mana pun.
+            </p>
+          </div>
+          <p>
+            Data hanya dapat dibagikan kepada penyedia infrastruktur pihak ketiga terbatas yang diperlukan untuk menjalankan sistem:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-600">
+            <li><strong>Penyedia Infrastruktur Cloud (Vercel & Database Provider):</strong> Untuk hosting aplikasi web serverless dan basis data terkelola.</li>
+            <li><strong>Layanan Komunikasi (WhatsApp Web / Meta):</strong> Saat kasir mengklik tombol kirim WhatsApp, data nomor telepon dan teks pesan dialihkan ke aplikasi WhatsApp resmi pengguna.</li>
+            <li><strong>Kewajiban Hukum:</strong> Apabila diwajibkan oleh proses hukum yang sah dari otoritas penegak hukum Republik Indonesia.</li>
+          </ul>
+        </section>
+
+        {/* 6. Hak-Hak Pengguna */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">6</span>
+            <h2>Hak-Hak Anda atas Data</h2>
+          </div>
+          <p>
+            Sebagai pemilik data atau pemilik usaha laundry yang menggunakan POS Laundry, Anda memiliki hak penuh untuk:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-slate-600">
+            <li><strong>Akses & Salinan Data:</strong> Mengunduh data penjualan dan rekap transaksi kapan saja melalui fitur Ekspor CSV Laporan.</li>
+            <li><strong>Koreksi Data:</strong> Memperbarui informasi pelanggan, nama layanan, tarif harga, atau profil outlet secara langsung dari panel kendali.</li>
+            <li><strong>Penghapusan / Penonaktifan:</strong> Menonaktifkan akun staf kasir yang sudah tidak aktif atau meminta penghapusan data akun outlet.</li>
+            <li><strong>Kontrol Otorisasi:</strong> Membatasi akses kasir dengan menerapkan otorisasi PIN Owner untuk aksi berisiko tinggi.</li>
+          </ul>
+        </section>
+
+        {/* 7. Penggunaan Cookie */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">7</span>
+            <h2>Kebijakan Cookie</h2>
+          </div>
+          <p>
+            POS Laundry hanya menggunakan cookie esensial (*Strictly Necessary Cookies*) bernama <code>pos_laundry_session</code> yang berfungsi mengidentifikasi sesi login aktif Anda. Kami tidak menggunakan cookie pelacak pihak ketiga (*third-party advertising tracking cookies*).
+          </p>
+        </section>
+
+        {/* 8. Perubahan Kebijakan */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">8</span>
+            <h2>Pembaruan Kebijakan Privasi</h2>
+          </div>
+          <p>
+            Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu untuk menyesuaikan perkembangan fitur layanan atau kepatuhan regulasi hukum. Setiap perubahan material akan diperbarui pada halaman ini beserta tanggal revisi terbaru di bagian atas dokumen.
+          </p>
+        </section>
+
+        {/* 9. Kontak Kami */}
+        <section class="space-y-3 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg">
+            <Mail className="w-5 h-5 text-blue-600" />
+            <h2>Kontak & Layanan Dukungan</h2>
+          </div>
+          <p>
+            Apabila Anda memiliki pertanyaan, keluhan, atau permintaan terkait pengelolaan data pribadi Anda dalam platform POS Laundry, silakan hubungi tim kami melalui:
+          </p>
+          <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 text-xs space-y-1.5">
+            <div><strong>Layanan:</strong> Tim Dukungan POS Laundry Pintar</div>
+            <div><strong>Situs Web:</strong> <a href="https://pos-laundry.vercel.app" class="text-blue-600 underline">https://pos-laundry.vercel.app</a></div>
+            <div><strong>Email Bantuan:</strong> <a href="mailto:support@pos-laundry.vercel.app" class="text-blue-600 underline">support@pos-laundry.vercel.app</a></div>
+            <div><strong>Lokasi Operasional:</strong> Indonesia</div>
+          </div>
+        </section>
+
+      </div>
+
+      {/* Footer Navigation Box */}
+      <div class="mt-8 p-6 rounded-2xl bg-slate-100 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+        <div class="text-center sm:text-left">
+          <span class="font-bold text-slate-900 block">POS Laundry Web System</span>
+          <span>Solusi digital modern kasir & manajemen usaha laundry kiloan & satuan.</span>
+        </div>
+        <div class="flex items-center gap-4 font-semibold">
+          <a href="/terms" class="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">
+            <span>Baca Syarat & Ketentuan</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </div>
+    </main>
+
+    {/* Bottom Footer */}
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+      <div class="max-w-4xl mx-auto px-4 space-y-1">
+        <div>&copy; {new Date().getFullYear()} POS Laundry System. Hak Cipta Dilindungi Undang-Undang.</div>
+        <div class="flex items-center justify-center gap-3 text-[11px] text-slate-400">
+          <a href="/privacy" class="hover:text-blue-600 underline">Kebijakan Privasi</a>
+          <span>&bull;</span>
+          <a href="/terms" class="hover:text-blue-600 underline">Syarat & Ketentuan</a>
+          <span>&bull;</span>
+          <a href="/login" class="hover:text-blue-600 underline">Masuk Kasir</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</Layout>

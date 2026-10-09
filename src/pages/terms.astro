@@ -1,0 +1,338 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {
+  FileText,
+  ShieldCheck,
+  Scale,
+  UserCheck,
+  AlertTriangle,
+  Coins,
+  MessageCircle,
+  HelpCircle,
+  ArrowLeft,
+  Calendar,
+  ChevronRight,
+  CheckCircle2,
+  Lock,
+  Mail
+} from 'lucide-react';
+
+const user = Astro.locals.user;
+const outlet = Astro.locals.outlet;
+const lastUpdated = "9 Oktober 2026";
+---
+
+<Layout title="Syarat & Ketentuan - POS Laundry" showNav={false}>
+  <div class="min-h-screen bg-slate-50 text-slate-800">
+    {/* Top Header Navigation */}
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href={user ? (user.role === 'owner' ? '/owner' : '/pos') : '/login'} class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs shadow-blue-500/20">
+            <Scale className="w-5 h-5" />
+          </div>
+          <div>
+            <span class="font-bold text-base text-slate-900 tracking-tight block leading-tight">
+              POS Laundry
+            </span>
+            <span class="text-[10px] font-medium text-slate-500 block uppercase tracking-wider">
+              Pusat Legalitas & Keamanan
+            </span>
+          </div>
+        </a>
+
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-1 text-xs">
+            <a href="/privacy" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium transition-colors">
+              Kebijakan Privasi
+            </a>
+            <span class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200">
+              Syarat & Ketentuan
+            </span>
+          </div>
+
+          <a
+            href={user ? (user.role === 'owner' ? '/owner' : '/pos') : '/login'}
+            class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>{user ? 'Kembali ke Aplikasi' : 'Masuk ke Kasir'}</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    {/* Hero Header */}
+    <section class="bg-linear-to-b from-blue-50/70 via-slate-50 to-slate-50 border-b border-slate-200/70 py-10 sm:py-14">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold border border-blue-200">
+          <Scale className="w-3.5 h-3.5 text-blue-600" />
+          <span>Ketentuan Layanan Resmi</span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Syarat & Ketentuan Layanan (Terms of Service)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          Aturan dan panduan penggunaan sistem kasir point-of-sale serta manajemen operasional laundry berbasis web <strong>POS Laundry</strong>.
+        </p>
+        <div class="flex items-center justify-center gap-2 text-[11px] text-slate-500 pt-2">
+          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+          <span>Terakhir diperbarui: <strong>{lastUpdated}</strong></span>
+          <span>&bull;</span>
+          <span>Berlaku untuk domain: <code class="bg-slate-200/60 px-1.5 py-0.5 rounded text-slate-700">pos-laundry.vercel.app</code></span>
+        </div>
+      </div>
+    </section>
+
+    {/* Main Content Area */}
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      {/* Mobile Tab Switcher */}
+      <div class="sm:hidden flex items-center bg-slate-200/80 p-1 rounded-xl mb-6 text-xs font-bold">
+        <a href="/privacy" class="flex-1 py-2 text-center rounded-lg text-slate-600 hover:text-slate-900">
+          Kebijakan Privasi
+        </a>
+        <span class="flex-1 py-2 text-center rounded-lg bg-white text-blue-700 shadow-xs">
+          Syarat & Ketentuan
+        </span>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-10 space-y-10 text-xs sm:text-sm leading-relaxed text-slate-700">
+
+        {/* 1. Penerimaan Ketentuan */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">1</span>
+            <h2>Penerimaan Ketentuan (Acceptance of Terms)</h2>
+          </div>
+          <p>
+            Dengan mendaftar, mengakses, atau menggunakan aplikasi web <strong>POS Laundry</strong> yang beralamat di <a href="https://pos-laundry.vercel.app" class="text-blue-600 font-medium underline">https://pos-laundry.vercel.app</a>, Anda menyatakan bahwa Anda telah membaca, memahami, dan menyetujui untuk terikat oleh seluruh Syarat dan Ketentuan ini.
+          </p>
+          <p>
+            Jika Anda tidak menyetujui salah satu bagian dari ketentuan ini, Anda tidak diperkenankan untuk mengakses atau menggunakan sistem POS Laundry.
+          </p>
+        </section>
+
+        {/* 2. Definisi Istilah */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">2</span>
+            <h2>Definisi Istilah</h2>
+          </div>
+          <div class="space-y-2">
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block font-semibold">A. "Platform" / "Sistem"</strong>
+              <span class="text-xs text-slate-600">Perangkat lunak berbasis web POS Laundry yang diakses melalui peramban, mencakup modul Terminal Kasir (POS), Manajemen Pesanan, CRM Pelanggan, Shift Kasir, Cetak Struk, dan Laporan Owner.</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block font-semibold">B. "Owner" / "Pemilik Usaha"</strong>
+              <span class="text-xs text-slate-600">Pengguna dengan tingkat otoritas tertinggi yang berwenang mengelola data master layanan, promo, karyawan, laporan omzet, pengaturan outlet, serta PIN otorisasi.</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block font-semibold">C. "Kasir" / "Operator"</strong>
+              <span class="text-xs text-slate-600">Staf pengguna yang diberi hak akses operasional untuk membuka/menutup shift, menginput transaksi cucian, mencetak struk, dan mengubah status cucian.</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <strong class="text-slate-900 block font-semibold">D. "Pelanggan"</strong>
+              <span class="text-xs text-slate-600">Konsumen individu yang menyerahkan pakaian/cucian untuk diproses oleh outlet usaha laundry pengguna.</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. Akun Pengguna & Kewajiban Keamanan */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">3</span>
+            <h2>Akun Pengguna & Tanggung Jawab Keamanan</h2>
+          </div>
+          <ul class="space-y-2 list-disc list-inside text-slate-600">
+            <li><strong>Akurasi Data Akun:</strong> Anda wajib memberikan data yang akurat saat membuat akun staf, menetapkan nama layanan, serta tarif harga.</li>
+            <li><strong>Kerahasiaan Kredensial:</strong> Pengguna bertanggung jawab penuh atas kerahasiaan username, kata sandi, dan <strong>PIN Otorisasi Owner</strong>. Dilarang membagikan PIN Owner kepada staf kasir tanpa izin.</li>
+            <li><strong>Aktivitas Akun:</strong> Segala transaksi, diskon, atau pembatalan order yang dibuat menggunakan akun tertentu dianggap sah dilakukan oleh pemegang akun tersebut.</li>
+            <li><strong>Sesi Login Kasir:</strong> Demi keamanan finansial, kasir disarankan melakukan logout saat meninggalkan meja kasir atau mengakhiri jam kerja shift.</li>
+          </ul>
+        </section>
+
+        {/* 4. Ketentuan Operasional Transaksi Kasir */}
+        <section class="space-y-4">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">4</span>
+            <h2>Ketentuan Transaksi & Operasional Kasir</h2>
+          </div>
+          <p>
+            Platform dirancang dengan tata kelola keuangan yang ketat (*Standard Operating Procedure*):
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <Coins className="w-4 h-4 text-amber-600" />
+                <span>A. Buka & Tutup Shift Kasir</span>
+              </div>
+              <p class="text-xs text-slate-600">
+                Kasir diwajibkan membuka shift dengan modal kas awal sebelum dapat membuat transaksi baru. Saat tutup shift, kasir wajib menghitung uang fisik laci secara jujur untuk mencatat ada tidaknya selisih kas.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <Lock className="w-4 h-4 text-blue-600" />
+                <span>B. Otorisasi Diskon Manual (&gt;20%)</span>
+              </div>
+              <p class="text-xs text-slate-600">
+                Pemberian diskon manual di atas 20% dari total tagihan memerlukan verifikasi PIN Otorisasi Owner untuk mencegah kecurangan kasir tanpa sepengetahuan pemilik usaha.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <span>C. Pembatalan Order & Refund</span>
+              </div>
+              <p class="text-xs text-slate-600">
+                Pembatalan pesanan yang sudah dibuat wajib menyertakan alasan pembatalan jelas dan keputusan pengembalian DP (Refund atau Hangus) yang akan tercatat permanen di log audit sistem.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>D. Penyerahan Cucian & Pelunasan</span>
+              </div>
+              <p class="text-xs text-slate-600">
+                Cucian yang belum lunas tidak dapat diserahkan ke pelanggan (*Sudah Diambil*) kecuali kasir memproses pelunasan terlebih dahulu atau mendapatkan persetujuan langsung dari Owner.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Kebijakan Komunikasi & Notifikasi WhatsApp */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">5</span>
+            <h2>Fitur Notifikasi WhatsApp & Kebijakan Anti-Spam</h2>
+          </div>
+          <p>
+            POS Laundry menyediakan tombol pintas pengiriman pesan WhatsApp (via tautan <code>api.whatsapp.com</code> / <code>wa.me</code>) untuk memudahkan kasir memberi tahu pelanggan:
+          </p>
+          <ul class="list-disc list-inside space-y-1.5 text-slate-600">
+            <li>Penggunaan fitur WhatsApp ini <strong>hanya diperuntukkan</strong> untuk keperluan resmi transaksi laundry (nota pesanan, konfirmasi cucian selesai siap diambil, dan penagihan piutang sah).</li>
+            <li>Pengguna <strong>dilarang keras</strong> menyalahgunakan nomor telepon pelanggan untuk pengiriman pesan spam, penipuan, promosi yang melanggar hukum, atau pesan tidak pantas lainnya.</li>
+            <li>Segala risiko pemblokiran nomor WhatsApp akibat aktivitas spamming oleh pengguna merupakan tanggung jawab pengguna sepenuhnya.</li>
+          </ul>
+        </section>
+
+        {/* 6. Hak Kekayaan Intelektual */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">6</span>
+            <h2>Hak Kekayaan Intelektual (Intellectual Property)</h2>
+          </div>
+          <p>
+            Seluruh kode program, arsitektur sistem, desain antarmuka (UI/UX), grafis, ikon, dan merek dagang <strong>POS Laundry</strong> adalah hak kekayaan intelektual milik pengembang yang dilindungi undang-undang hak cipta. Pengguna tidak diperbolehkan menyalin, memodifikasi, mendekompilasi (*reverse engineer*), atau menjual kembali sistem ini tanpa izin tertulis.
+          </p>
+          <p>
+            Namun, <strong>data bisnis laundry Anda</strong> (daftar pelanggan, riwayat invoice, data omzet, dan rincian transaksi) adalah sepenuhnya milik Anda (*Your Data*).
+          </p>
+        </section>
+
+        {/* 7. Batasan Tanggung Jawab (Disclaimer) */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">7</span>
+            <h2>Batasan Tanggung Jawab (Disclaimer & Limitation of Liability)</h2>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 text-xs space-y-2">
+            <p>
+              <strong>1. Kondisi Layanan:</strong> Layanan POS Laundry disediakan atas dasar <em>"sebagaimana adanya" (as is)</em> dan <em>"sebagaimana tersedia" (as available)</em> tanpa jaminan apa pun baik tersurat maupun tersirat.
+            </p>
+            <p>
+              <strong>2. Kerusakan Fisik Pakaian/Cucian:</strong> POS Laundry adalah penyedia sistem kasir lunak (software). Kami <strong>tidak bertanggung jawab</strong> atas segala kerusakan fisik pakaian, cucian luntur, tertukar, susut, atau hilang yang timbul dalam hubungan jasa pencucian antara outlet laundry Anda dan pelanggan Anda.
+            </p>
+            <p>
+              <strong>3. Kendala Perangkat Keras & Jaringan Lokal:</strong> Kami tidak bertanggung jawab atas kegagalan cetak struk akibat kerusakan printer termal Bluetooth/USB lokal pengguna atau gangguan koneksi penyedia internet lokal (ISP).
+            </p>
+          </div>
+        </section>
+
+        {/* 8. Penghentian Layanan */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">8</span>
+            <h2>Penghentian Layanan (Termination)</h2>
+          </div>
+          <p>
+            Kami berhak untuk menangguhkan atau menghentikan akses akun pengguna apabila ditemukan adanya indikasi manipulasi sistem, aktivitas ilegal, pelanggaran terhadap Syarat dan Ketentuan ini, atau upaya peretasan terhadap server cloud POS Laundry.
+          </p>
+        </section>
+
+        {/* 9. Hukum yang Mengatur */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">9</span>
+            <h2>Hukum yang Mengatur (Governing Law)</h2>
+          </div>
+          <p>
+            Syarat dan Ketentuan ini diatur dan ditafsirkan berdasarkan hukum yang berlaku di <strong>Negara Kesatuan Republik Indonesia</strong>. Segala perselisihan yang timbul dari pelaksanaan ketentuan ini akan diselesaikan terlebih dahulu melalui musyawarah untuk mufakat.
+          </p>
+        </section>
+
+        {/* 10. Pembaruan Ketentuan */}
+        <section class="space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg border-b border-slate-100 pb-2">
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-extrabold">10</span>
+            <h2>Perubahan Syarat & Ketentuan</h2>
+          </div>
+          <p>
+            Kami berhak mengubah atau memperbarui Syarat dan Ketentuan ini sewaktu-waktu. Perubahan akan berlaku efektif segera setelah dipublikasikan pada halaman ini. Penggunaan berkelanjutan atas layanan setelah perubahan dipublikasikan merupakan bentuk persetujuan Anda atas syarat yang telah direvisi.
+          </p>
+        </section>
+
+        {/* 11. Kontak & Pertanyaan */}
+        <section class="space-y-3 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-base sm:text-lg">
+            <Mail className="w-5 h-5 text-blue-600" />
+            <h2>Hubungi Kami</h2>
+          </div>
+          <p>
+            Jika Anda memiliki pertanyaan mengenai Syarat dan Ketentuan ini, silakan hubungi tim kami:
+          </p>
+          <div class="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/80 text-xs space-y-1.5">
+            <div><strong>Layanan:</strong> Tim POS Laundry Pintar</div>
+            <div><strong>Situs Web:</strong> <a href="https://pos-laundry.vercel.app" class="text-blue-600 underline">https://pos-laundry.vercel.app</a></div>
+            <div><strong>Email Dukungan:</strong> <a href="mailto:support@pos-laundry.vercel.app" class="text-blue-600 underline">support@pos-laundry.vercel.app</a></div>
+            <div><strong>Wilayah Hukum:</strong> Republik Indonesia</div>
+          </div>
+        </section>
+
+      </div>
+
+      {/* Footer Navigation Box */}
+      <div class="mt-8 p-6 rounded-2xl bg-slate-100 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+        <div class="text-center sm:text-left">
+          <span class="font-bold text-slate-900 block">POS Laundry Web System</span>
+          <span>Solusi digital modern kasir & manajemen usaha laundry kiloan & satuan.</span>
+        </div>
+        <div class="flex items-center gap-4 font-semibold">
+          <a href="/privacy" class="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">
+            <span>Baca Kebijakan Privasi</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </div>
+    </main>
+
+    {/* Bottom Footer */}
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+      <div class="max-w-4xl mx-auto px-4 space-y-1">
+        <div>&copy; {new Date().getFullYear()} POS Laundry System. Hak Cipta Dilindungi Undang-Undang.</div>
+        <div class="flex items-center justify-center gap-3 text-[11px] text-slate-400">
+          <a href="/privacy" class="hover:text-blue-600 underline">Kebijakan Privasi</a>
+          <span>&bull;</span>
+          <a href="/terms" class="hover:text-blue-600 underline">Syarat & Ketentuan</a>
+          <span>&bull;</span>
+          <a href="/login" class="hover:text-blue-600 underline">Masuk Kasir</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</Layout>

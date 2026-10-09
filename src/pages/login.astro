@@ -9,8 +9,13 @@ import { LoginForm } from '../components/LoginForm';
   <div class="min-h-screen bg-linear-to-br from-slate-100 via-blue-50/40 to-slate-200 flex flex-col justify-center items-center p-4">
     <LoginForm client:load />
     
-    <div class="mt-6 text-center text-xs text-slate-500">
-      &copy; {new Date().getFullYear()} POS Laundry System &bull; Versi 1.0 (MVP)
+    <div class="mt-6 text-center text-xs text-slate-500 space-y-1.5">
+      <div>&copy; {new Date().getFullYear()} POS Laundry System &bull; Versi 1.0 (MVP)</div>
+      <div class="flex items-center justify-center gap-3 text-[11px] text-slate-500">
+        <a href="/privacy" class="hover:text-blue-600 transition-colors underline">Kebijakan Privasi</a>
+        <span>&bull;</span>
+        <a href="/terms" class="hover:text-blue-600 transition-colors underline">Syarat & Ketentuan</a>
+      </div>
     </div>
   </div>
 </Layout>

@@ -28,6 +28,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     pathname === "/" ||
     pathname === "/login" ||
     pathname === "/logout" ||
+    pathname === "/privacy" ||
+    pathname === "/terms" ||
     pathname.startsWith("/logout") ||
     pathname.startsWith("/api/auth/login") ||
     pathname.startsWith("/api/auth/logout") ||
